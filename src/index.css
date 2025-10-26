@@ -20,6 +20,7 @@
   --secondary-foreground: oklch(0.20 0.05 240);
   --muted: oklch(0.94 0.02 180);
   --muted-foreground: oklch(0.45 0.02 240);
+  --muted-foreground-alpha: oklch(0.45 0.02 240 / 0.1);
   --accent: oklch(0.75 0.15 280);
   --accent-foreground: oklch(0.15 0.02 240);
   --destructive: oklch(0.65 0.20 25);
@@ -116,7 +117,7 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--muted) 25%, var(--muted-foreground/10) 50%, var(--muted) 75%);
+  background: linear-gradient(90deg, var(--muted) 25%, var(--muted-foreground-alpha) 50%, var(--muted) 75%);
   background-size: 200% 100%;
   border-radius: var(--radius);
   animation: shimmer 2s infinite;

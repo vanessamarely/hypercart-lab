@@ -21,7 +21,7 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [debounceTimer, setDebounceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [searchProducts, setSearchProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCartModal, setShowCartModal] = useState(false);
