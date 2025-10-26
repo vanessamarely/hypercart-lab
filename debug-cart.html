@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Cart</title>
+</head>
+<body>
+    <h1>Debug Cart Storage</h1>
+    <div id="info"></div>
+    
+    <script>
+        function debugCart() {
+            const info = document.getElementById('info');
+            
+            // Check localStorage
+            const cart = localStorage.getItem('hypercart-cart');
+            const flags = localStorage.getItem('hypercart-flags');
+            
+            info.innerHTML = `
+                <h3>LocalStorage Status:</h3>
+                <p><strong>Cart:</strong> ${cart || 'Empty'}</p>
+                <p><strong>Flags:</strong> ${flags || 'None'}</p>
+                
+                <h3>Actions:</h3>
+                <button onclick="clearCart()">Clear Cart</button>
+                <button onclick="clearFlags()">Clear Flags</button>
+                <button onclick="addTestItem()">Add Test Item</button>
+                <button onclick="debugCart()">Refresh</button>
+            `;
+        }
+        
+        function clearCart() {
+            localStorage.removeItem('hypercart-cart');
+            alert('Cart cleared');
+            debugCart();
+        }
+        
+        function clearFlags() {
+            localStorage.removeItem('hypercart-flags');
+            alert('Flags cleared');
+            debugCart();
+        }
+        
+        function addTestItem() {
+            const testCart = [
+                {
+                    product: { id: 1, name: "Test Product", price: 10 },
+                    quantity: 1
+                }
+            ];
+            localStorage.setItem('hypercart-cart', JSON.stringify(testCart));
+            alert('Test item added');
+            debugCart();
+        }
+        
+        // Initialize
+        debugCart();
+    </script>
+</body>
+</html>
