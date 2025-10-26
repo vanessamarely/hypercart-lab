@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Activity, 
+  Question, // Changed from Activity to available icon
   Clock, 
   Eye, 
   Gauge, 
@@ -260,7 +260,7 @@ export function PerformanceDashboard({ visible, onClose }: { visible: boolean; o
       key: 'inp', 
       label: 'Interaction to Next Paint', 
       description: 'Responsiveness',
-      icon: <Activity size={20} />,
+      icon: <Question size={20} />,
     },
   ];
 
