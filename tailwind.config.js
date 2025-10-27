@@ -19,9 +19,10 @@ const defaultTheme = {
   },
   extend: {
     screens: {
-      coarse: { raw: "(pointer: coarse)" },
-      fine: { raw: "(pointer: fine)" },
-      pwa: { raw: "(display-mode: standalone)" },
+      // Using standard breakpoints instead of feature queries for better CSS optimization
+      coarse: "768px", // Tablet and up (typically coarse pointer devices)
+      fine: "1024px",  // Desktop and up (typically fine pointer devices)  
+      pwa: "320px",    // All devices (standalone mode detection via JS instead)
     },
     colors: {
       neutral: {

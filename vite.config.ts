@@ -22,22 +22,36 @@ export default defineConfig({
   },
   build: {
     // Optimize for Vercel deployment
-    target: 'esnext',
+    target: 'es2022',
     minify: 'esbuild',
     sourcemap: false,
+    commonjsOptions: {
+      transformMixedEsModules: true
+    },
     rollupOptions: {
-      // Ensure external dependencies are handled correctly
+      // Force external dependencies to be treated correctly
       external: [],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-accordion', '@radix-ui/react-alert-dialog', '@radix-ui/react-avatar']
-        }
+          ui: ['@radix-ui/react-accordion', '@radix-ui/react-alert-dialog', '@radix-ui/react-avatar'],
+          router: ['react-router-dom']
+        },
+        // Ensure consistent chunk names
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     }
   },
   optimizeDeps: {
     // Pre-bundle these dependencies for better performance
-    include: ['react', 'react-dom', 'react-router-dom']
+    include: ['react', 'react-dom', 'react-router-dom'],
+    // Exclude problematic dependencies from optimization
+    exclude: []
+  },
+  // Ensure proper ESM handling
+  esbuild: {
+    target: 'es2022'
   }
 });
