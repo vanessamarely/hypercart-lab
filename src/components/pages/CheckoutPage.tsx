@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,7 +29,9 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
     expiryDate: '',
     cvv: ''
   });
-  const flags = getFlags();
+  
+  // Memoize flags to prevent infinite re-renders
+  const flags = useMemo(() => getFlags(), []);
 
   useEffect(() => {
     addPerformanceMark('checkout-page-load');

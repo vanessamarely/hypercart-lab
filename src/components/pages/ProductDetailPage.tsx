@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,9 @@ export function ProductDetailPage({ productId, onNavigate }: ProductDetailPagePr
   const [product, setProduct] = useState<Product | null>(null);
   const [showCartModal, setShowCartModal] = useState(false);
   const [productImage, setProductImage] = useState<string>('');
-  const flags = getFlags();
+  
+  // Memoize flags to prevent infinite re-renders
+  const flags = useMemo(() => getFlags(), []);
 
   useEffect(() => {
     addPerformanceMark('product-detail-start');
@@ -119,7 +121,7 @@ export function ProductDetailPage({ productId, onNavigate }: ProductDetailPagePr
       element.removeEventListener('touchmove', handleTouchMove as EventListener);
       element.removeEventListener('wheel', handleWheel as EventListener);
     };
-  }, [productId, flags]);
+  }, [productId]); // Only depend on productId, not flags
 
   const handleAddToCart = async () => {
     if (!product) return;

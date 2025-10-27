@@ -37,21 +37,27 @@ npm run dev
 
 ### Recording Script:
 ```
-🎙️ "Empezamos con LCP - Largest Contentful Paint. Esta métrica mide cuánto tarda en aparecer el contenido principal que ve el usuario."
+🎙️ "Empezamos con LCP - Largest Contentful Paint. Esta métrica mide cuándo aparece el contenido principal."
 
-🎬 [Mostrar página inicial con debug panel visible]
-📊 [Abrir Performance panel, comenzar grabación]
+🎬 [Mostrar página inicial]
+📊 [Hacer clic en el botón Performance Dashboard (círculo con gráfico inferior derecha)]
+🎙️ "Nuestro dashboard de Core Web Vitals en tiempo real muestra LCP en estado POOR - por encima de 2.5 segundos"
+
+📊 [Abrir Performance panel en DevTools, comenzar grabación]
 🔄 [Refresh página, esperar carga completa, parar grabación]
 
-🎙️ "Observen el timeline. El LCP está en aproximadamente 2.5 segundos. Ven la imagen hero cargándose al final del waterfall de recursos."
+🎙️ "En el timeline vemos la imagen hero cargándose tarde. El dashboard confirma el problema."
 
-⚡ [Activar flags uno por uno]
+⚡ [Activar flags uno por uno mientras el dashboard está visible]
 - heroPreload: "Preload prioriza la imagen hero"
 - heroFetchPriorityHigh: "fetchpriority='high' aumenta la prioridad"
 - fontPreconnect: "Preconnect acelera la carga de fuentes"
 
 🎬 [Nueva grabación de performance]
-🔄 [Clear cache, refresh, mostrar mejora]
+🔄 [Clear cache, refresh]
+📊 [Ver mejora en tiempo real en el dashboard - LCP cambia de rojo a verde]
+🎙️ "¡Éxito! Dashboard muestra LCP mejorado a rating GOOD bajo 2.5 segundos"
+```
 
 🎙️ "LCP mejorado a ~1.5 segundos. 40% de mejora siguiendo el Performance Loop."
 ```
@@ -69,9 +75,11 @@ npm run dev
 ```
 🎙️ "Performance y Network panels trabajan en equipo. Performance muestra QUÉ pasa, Network explica POR QUÉ."
 
-🎬 [Mostrar products page con debug panel]
-📊 [Network panel abierto, refresh página]
+🎬 [Mostrar products page]
+📊 [Abrir Performance Dashboard primero]
+🎙️ "Dashboard muestra todas nuestras métricas en tiempo real. CLS y LCP están en estado POOR."
 
+📊 [Network panel abierto, refresh página]
 🎙️ "Observen este script de terceros bloqueando el parsing. 200ms de bloqueo por un banner publicitario."
 
 🎬 [Switch a Performance panel]
@@ -83,7 +91,8 @@ npm run dev
 🎙️ "90% del CSS extra no se usa. 4KB desperdiciados que el usuario descarga y el browser procesa."
 
 ⚡ [Desactivar flags para mostrar mejora]
-🎙️ "Sin terceros ni CSS extra, la página vuela."
+📊 [Ver métricas mejorando en tiempo real en el dashboard]
+🎙️ "Sin terceros ni CSS extra, el dashboard confirma: todas las métricas mejoran a estado GOOD."
 ```
 
 ---
@@ -100,13 +109,17 @@ npm run dev
 🎙️ "INP mide la responsividad. Un Long Task es como un Stormtrooper bloqueando el main thread."
 
 🎬 [Mostrar product detail page]
+📊 [Abrir Performance Dashboard - mostrar INP metric]
+🎙️ "Dashboard muestra INP en rating POOR - por encima de 200ms. Cada interacción se siente lenta."
+
 📊 [Performance recording iniciado]
 🔄 [Hacer clic rápido en "Add to Cart" múltiples veces]
 
 🎙️ "Observen la aplicación congelándose. Cada click crea un Long Task de 120ms."
+📊 [Ver INP disparándose en el dashboard en tiempo real]
 
 📊 [Parar recording, mostrar timeline]
-🎙️ "Estos bloques rojos son Long Tasks >50ms. INP >200ms significa usuarios frustrados."
+🎙️ "Estos bloques rojos son Long Tasks >50ms. Dashboard confirma INP >500ms - crítico."
 
 ⚡ [Activar optimizaciones]
 - useWorker: "Movemos el trabajo pesado a Web Worker"
@@ -114,7 +127,8 @@ npm run dev
 - simulateLongTask OFF: "Eliminamos el bloqueo"
 
 🎬 [Nueva grabación con optimizaciones]
-🎙️ "Main thread libre, INP <200ms, usuarios felices."
+📊 [Ver mejora inmediata en dashboard - INP baja a GOOD]
+🎙️ "Main thread libre, INP <200ms, usuarios felices. Dashboard lo confirma en verde."
 ```
 
 ---
@@ -131,18 +145,23 @@ npm run dev
 🎙️ "Input responsiveness es crítico. Cada keystroke puede generar trabajo innecesario."
 
 🎬 [Search page visible]
+📊 [Abrir Performance Dashboard]
+🎙️ "Dashboard muestra INP elevado - cada tecla está bloqueando el main thread."
+
 📊 [Performance recording]
 ⌨️ [Escribir rápidamente: "smartphone case protection wireless"]
 
 🎙️ "Sin optimizaciones, cada letra dispara búsquedas y bloquea el main thread."
+📊 [Ver INP disparándose en dashboard con cada letra]
 
-⚡ [Activar optimizaciones progresivamente]
+⚡ [Activar optimizaciones progresivamente mientras dashboard está visible]
 - debounce: "300ms debounce reduce el work"
 - microYield: "Chunking del processing"
 - useWorker: "Búsqueda en background thread"
 
 🎬 [Repetir escritura con optimizaciones]
-🎙️ "Responsive typing, trabajo en background, usuario sin interrupciones."
+📊 [Ver mejora inmediata en dashboard - INP se mantiene en GOOD]
+🎙️ "Responsive typing, trabajo en background, dashboard confirma INP estable bajo 200ms."
 ```
 
 ---

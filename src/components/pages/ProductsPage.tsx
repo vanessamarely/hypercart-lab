@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,9 @@ export function ProductsPage({ onProductClick, onNavigate }: ProductsPageProps) 
   const [showCartModal, setShowCartModal] = useState(false);
   const [addedProduct, setAddedProduct] = useState<Product | null>(null);
   const [productImages, setProductImages] = useState<Map<number, string>>(new Map());
-  const flags = getFlags();
+  
+  // Memoize flags to prevent infinite re-renders
+  const flags = useMemo(() => getFlags(), []);
 
   useEffect(() => {
     addPerformanceMark('products-page-start');
@@ -38,16 +40,17 @@ export function ProductsPage({ onProductClick, onNavigate }: ProductsPageProps) 
       
       // Load images in parallel but with a small delay to avoid rate limiting
       const imagePromises = productsToLoad.map((product, index) => 
-        new Promise(resolve => {
+        new Promise<string>(resolve => {
           setTimeout(async () => {
             try {
               const imageUrl = await getLocalProductImage(product.id, product.category, product.name);
               imageMap.set(product.id, imageUrl);
-              setProductImages(new Map(imageMap));
               resolve(imageUrl);
             } catch (error) {
               console.error(`Failed to load image for product ${product.id}:`, error);
-              resolve('/src/assets/images/product-1.webp');
+              const fallbackUrl = '/src/assets/images/product-1.webp';
+              imageMap.set(product.id, fallbackUrl);
+              resolve(fallbackUrl);
             }
           }, index * 200); // 200ms delay between requests
         })
@@ -55,6 +58,8 @@ export function ProductsPage({ onProductClick, onNavigate }: ProductsPageProps) 
       
       await Promise.all(imagePromises);
       
+      // Update images only once after all are loaded
+      setProductImages(imageMap);
       setLoading(false);
       
       addPerformanceMark('products-page-end');

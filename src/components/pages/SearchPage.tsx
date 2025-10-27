@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,9 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
   const [showCartModal, setShowCartModal] = useState(false);
   const [addedProduct, setAddedProduct] = useState<Product | null>(null);
   const [productImages, setProductImages] = useState<Map<number, string>>(new Map());
-  const flags = getFlags();
+  
+  // Memoize flags to prevent infinite re-renders
+  const flags = useMemo(() => getFlags(), []);
 
   useEffect(() => {
     const loadProductsWithImages = async () => {

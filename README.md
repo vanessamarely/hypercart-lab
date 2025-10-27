@@ -1,13 +1,13 @@
 # HyperCart Lab - Performance Debugging Demo
 
-A production-ready React + TypeScript demo application designed for Chrome DevTools performance debugging conference talks. Features toggleable performance issues for live demonstrations of Core Web Vitals optimization techniques.
+A production-ready React + TypeScript e-commerce demo application designed for Chrome DevTools performance debugging demonstrations. Features toggleable performance issues and a real-time Core Web Vitals dashboard for live optimization demos.
 
 ## Quick Start
 
 ```bash
 # Clone and install
 git clone <repository-url>
-cd hypercart-lab-chrome
+cd hypercart-lab
 npm install
 
 # Start development server
@@ -23,159 +23,148 @@ npm run build
 npm run preview
 ```
 
-## Configuration
+## Core Features
 
-### Local Asset Management
+### 🎛️ Debug Panel
+- **Toggle Access**: Add `?debug=1` to any URL to show the debug panel
+- **Performance Flags**: 16+ toggleable optimizations and anti-patterns
+- **Active Count Badge**: Shows number of active flags
+- **Persistent Settings**: Flags saved in localStorage across sessions
 
-The app uses local images stored in `/src/assets/images/` for reliable offline performance:
-- Product images: `product-1.webp` through `product-6.webp`
-- Hero images: `hero.webp`, `hero-2x.webp` 
-- No external API dependencies for demo reliability
+### 📊 Core Web Vitals Dashboard
+- **Real-time Metrics**: Live LCP, INP, CLS, FCP, TTFB monitoring
+- **Color-coded Ratings**: Green (Good), Yellow (Needs Improvement), Red (Poor)
+- **Always Available**: Circular button in bottom-right corner (no debug=1 needed)
+- **Performance Validation**: Instantly see optimization effects
 
-## Debug Panel Access
+### 🏪 E-commerce Features
+- **Product Catalog**: 12+ products with high-quality images
+- **Search Functionality**: Debounced search with performance optimizations
+- **Shopping Cart**: Full cart management with modal confirmations
+- **Checkout Flow**: Complete form with performance monitoring
 
-- **Development**: Debug panel automatically visible
-- **Production**: Add `?debug=1` to URL to show debug panel
-- **Toggle Count**: Badge shows number of active performance flags
+## Performance Flags Reference
 
-## Routes & Performance Labs
-
-### 🏠 Home Page (`/`) - LCP/CLS Lab
-**Focus**: Largest Contentful Paint & Cumulative Layout Shift optimization
-
-**Available Toggles**:
-- `heroPreload`: Preload hero image for faster LCP
+### � LCP/CLS Optimization Flags
+- `heroPreload`: Preload critical hero image for faster LCP
 - `heroFetchPriorityHigh`: Use `fetchpriority="high"` attribute
 - `fontPreconnect`: Preconnect to Google Fonts
-- `reserveHeroSpace`: Reserve space to prevent CLS
-- `lateBanner`: Insert banner after 2s (causes CLS when space not reserved)
+- `reserveHeroSpace`: Reserve hero space to prevent layout shift
+- `lateBanner`: **Anti-pattern** - Insert banner after load (causes CLS)
 
-### 🛍️ Products Grid (`/products`) - Coverage/Network Lab
-**Focus**: Network optimization and code coverage analysis
+### 🌐 Network/Coverage Flags  
+- `injectThirdParty`: **Anti-pattern** - Load blocking third-party script
+- `loadExtraCSS`: **Anti-pattern** - Load CSS with 90% unused rules
+- `lazyOff`: **Anti-pattern** - Disable image lazy loading
 
-**Available Toggles**:
-- `injectThirdParty`: Load heavy blocking third-party script
-- `loadExtraCSS`: Load CSS file with unused rules (4KB+ unused styles)
-- `lazyOff`: Disable image lazy loading (eager load all 30 images)
+### ⚡ INP/Long Task Flags
+- `listenersPassive`: Use passive event listeners for smooth scrolling
+- `simulateLongTask`: **Anti-pattern** - Block main thread 120ms on interactions
+- `useWorker`: Move heavy processing to Web Worker
 
-### 📱 Product Detail (`/product/:id`) - INP/Long Tasks Lab
-**Focus**: Interaction to Next Paint and main thread optimization
-
-**Available Toggles**:
-- `listenersPassive`: Use passive event listeners for touch/wheel
-- `simulateLongTask`: Block main thread for 120ms on interactions
-- `useWorker`: Move heavy formatting to Web Worker
-
-### 🔍 Search Page (`/search`) - INP/Input Lab
-**Focus**: Input responsiveness and search optimization
-
-**Available Toggles**:
+### 🔍 Search/Input Flags
 - `debounce`: Debounce search input (300ms delay)
-- `microYield`: Chunk work with micro-yields between processing
-- `useWorker`: Perform search in Web Worker (fallback to main thread)
+- `microYield`: Chunk processing with micro-yields
+- `useWorker`: Perform search operations in Web Worker
 
-### 🛒 Checkout (`/checkout`) - CLS/UX Lab
-**Focus**: Layout stability and user experience
-
-**Available Toggles**:
-- `missingSizes`: Remove image dimensions (causes CLS)
+### 🎨 CLS/UX Flags
+- `missingSizes`: **Anti-pattern** - Remove image dimensions
 - `intrinsicPlaceholders`: Use `content-visibility: auto` for placeholders
 
-## Live Demo Scripts (Conference Runbook)
+## Demo Scenarios
 
-**⚠️ NOTA**: Estas demos están diseñadas para **grabación de videos** que puedes mostrar durante tu charla. Esto evita problemas técnicos en vivo y permite mejor control del timing.
+### 📈 Demo 1: LCP Optimization (Home Page)
 
-### 🎬 Video Recording Strategy
+**Setup**: Open `http://localhost:5173/?debug=1`
 
-En lugar de demos en vivo riesgosas, graba estos videos con anticipación:
+**Baseline (Poor Performance)**:
+1. Ensure all LCP flags are OFF: `heroPreload`, `heroFetchPriorityHigh`, `fontPreconnect`
+2. Open Core Web Vitals Dashboard (bottom-right button)
+3. Open Chrome DevTools → Performance panel
+4. Record page load - observe LCP >3 seconds (Red rating)
 
-1. **Video 1: LCP Optimization** (3-4 mins) - Home page optimization
-2. **Video 2: Network Analysis** (2-3 mins) - Third-party impact 
-3. **Video 3: INP Problems** (3-4 mins) - Long tasks and interactions
-4. **Video 4: Input Responsiveness** (2-3 mins) - Search optimization
-5. **Video 5: Advanced DevTools** (3-4 mins) - Master techniques
+**Apply Optimizations**:
+1. Enable `heroPreload` → See immediate LCP improvement in dashboard
+2. Enable `heroFetchPriorityHigh` → Further network prioritization  
+3. Enable `fontPreconnect` → Faster text rendering
+4. Final result: LCP <2.5s (Green rating in dashboard)
 
-**Ver `VIDEO_RECORDING_GUIDE.md` para scripts detallados de grabación.**
+**Key Learning**: Network waterfall optimization and resource prioritization
 
-<!--
-DEMOS COMENTADAS - USA VIDEO_RECORDING_GUIDE.md EN SU LUGAR
+### 🚀 Demo 2: Network Analysis (Products Page)
 
-### 🎯 Demo 1: LCP Optimization (5 minutes)
+**Setup**: Open `http://localhost:5173/products?debug=1`
 
-**Setup**:
-1. Open `/?debug=1` in Chrome
-2. Open DevTools → Performance panel
-3. Turn OFF all LCP flags: `heroPreload`, `heroFetchPriorityHigh`, `fontPreconnect`, `reserveHeroSpace`
+**Introduce Problems**:
+1. Enable `injectThirdParty` → Blocking script appears
+2. Enable `loadExtraCSS` → Unused CSS loading
+3. Open DevTools → Network panel
+4. Record page load → Show blocking resources
 
-[... resto de demos comentadas para enfocar en videos ...]
--->
+**Analysis Workflow**:
+1. Performance panel → Identify Long Tasks from third-party
+2. Network panel → Show blocking script correlation  
+3. Coverage panel → Highlight 90% unused CSS
+4. Disable flags → Show immediate improvement
 
-### 🎬 Quick Video Recording Reference
+**Key Learning**: Third-party impact and coverage analysis correlation
 
-Para grabar los videos de tu charla, usa estas configuraciones:
+### ⚡ Demo 3: INP Optimization (Product Detail)
 
-**Video 1 - LCP Optimization:**
-- Page: `http://localhost:5000/?debug=1`
-- Flags OFF: `heroPreload`, `heroFetchPriorityHigh`, `fontPreconnect`, `reserveHeroSpace`
-- Focus: Network waterfall + LCP improvement
+**Setup**: Open `http://localhost:5173/product/1?debug=1`
 
-**Video 2 - Network Analysis:**
-- Page: `http://localhost:5000/products?debug=1`
-- Flags ON: `injectThirdParty`, `loadExtraCSS`
-- Focus: Performance + Network + Coverage correlation
+**Create Interaction Problems**:
+1. Enable `simulateLongTask` 
+2. Disable `listenersPassive`
+3. Open Core Web Vitals Dashboard
+4. Rapidly click "Add to Cart" → Observe poor INP (Red rating)
 
-**Video 3 - INP Optimization:**
-- Page: `http://localhost:5000/product/1?debug=1`
-- Flags ON: `simulateLongTask`, `listenersPassive=OFF`
-- Focus: Long Tasks elimination
+**Apply Solutions**:
+1. Enable `useWorker` → Move processing off main thread
+2. Enable `listenersPassive` → Smooth scrolling
+3. Disable `simulateLongTask` → Remove artificial blocking
+4. Test interactions → INP <200ms (Green rating)
 
-**Video 4 - Input Responsiveness:**
-- Page: `http://localhost:5000/search?debug=1`
-- Flags OFF: `debounce`, `microYield`, `useWorker`
-- Focus: Search optimization
+**Key Learning**: Main thread optimization and Web Worker benefits
 
-**Video 5 - Advanced DevTools:**
-- Focus: Performance marks, AI features, Local Overrides, Coverage panel
+### 🔍 Demo 4: Input Responsiveness (Search)
 
-**📋 Ver `VIDEO_RECORDING_GUIDE.md` para scripts completos de grabación.**
+**Setup**: Open `http://localhost:5173/search?debug=1`
 
----
+**Problematic Input**:
+1. Ensure OFF: `debounce`, `microYield`, `useWorker`
+2. Open Performance panel and start recording
+3. Type rapidly: "smartphone case protection wireless"
+4. Observe input lag and constant re-searching
 
-## Performance Monitoring Hooks
+**Progressive Enhancement**:
+1. Enable `debounce` → Reduce search frequency
+2. Enable `microYield` → Chunk processing to prevent blocking
+3. Enable `useWorker` → Background search operations
+4. Repeat typing → Smooth, responsive input
 
-The app includes comprehensive performance marking for detailed analysis:
+**Key Learning**: Input optimization strategies and background processing
 
-```javascript
-// Automatic marks created:
-'app-start'              // App initialization
-'home-page-start/end'    // Home page load
-'hero-image-loaded'      // Hero image LCP candidate
-'products-page-start/end' // Products page load  
-'render-products-start/end' // Product grid rendering
-'search-start/end'       // Search operations
-'add-to-cart-start/end'  // Cart interactions
-'checkout-submit-start/end' // Form submissions
-```
+### 🧰 Demo 5: Advanced DevTools Features
 
-## DevTools Analysis Guide
+**Performance Marks Analysis**:
+1. Open Performance panel
+2. Record any page interaction
+3. Locate custom performance marks: `home-page-start`, `add-to-cart-start`
+4. Right-click call tree → "Explain with AI" (Chrome 127+)
 
-### 🔍 Performance Panel Features
-- **Web Vitals**: Enable to see LCP, INP, CLS markers
-- **AI Assistance**: Right-click call tree → "Explain with AI"
-- **Screenshots**: Enable to see visual progression
-- **Memory**: Show memory usage patterns
+**Core Web Vitals Integration**:
+1. Enable "Web Vitals" in Performance panel
+2. Compare DevTools metrics with real-time dashboard
+3. Show correlation between optimization flags and metric improvements
 
-### 📊 Key Metrics to Monitor
-- **LCP (Largest Contentful Paint)**: Target <2.5s
-- **INP (Interaction to Next Paint)**: Target <200ms  
-- **CLS (Cumulative Layout Shift)**: Target <0.1
-- **Long Tasks**: Identify >50ms blocking tasks
+**Coverage-driven Optimization**:
+1. Open Coverage panel
+2. Record page usage
+3. Identify unused code (red bars)
+4. Toggle `loadExtraCSS` to demonstrate impact
 
-### 🛠️ Network Optimization
-- **Resource Priority**: Check fetch priority hints
-- **Preloading**: Verify preload links in Network
-- **Third-Party**: Identify blocking external scripts
-- **Coverage**: Find unused CSS/JS for optimization
+**Key Learning**: Advanced debugging techniques and AI-assisted analysis
 
 ## Technical Implementation
 
@@ -191,90 +180,198 @@ measurePerformance('operation', 'start', 'end')
 // Worker management
 const worker = new WorkerManager()
 await worker.execute('heavy-task', data)
+
+// Listener optimization
+addPassiveListeners(element, ['scroll', 'touchmove'], handler)
+addNonPassiveListeners(element, ['click'], handler)
 ```
 
-### Flag Management
+### Performance Monitoring
+
+The app automatically creates performance marks for analysis:
+
+```javascript
+// Page lifecycle marks
+'app-start'                    // Application initialization
+'home-page-start/end'          // Home page load timing
+'products-page-start/end'      // Products page load timing
+'product-detail-start/end'     // Product detail load timing
+'search-start/end'             // Search operation timing
+
+// Interaction marks  
+'add-to-cart-start/end'        // Cart interaction timing
+'checkout-submit-start/end'    // Form submission timing
+'render-products-start/end'    // Product grid rendering
+
+// Asset loading marks
+'hero-image-loaded'            // Hero image LCP candidate
+'block-start/end'              // Main thread blocking simulation
+```
+
+### Core Web Vitals Dashboard API
+
+```typescript
+interface WebVitalMetric {
+  name: string;
+  value: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+  delta?: number;
+  entries?: PerformanceEntry[];
+}
+
+// Thresholds used by dashboard
+const THRESHOLDS = {
+  lcp: { good: 2500, poor: 4000 },    // milliseconds
+  inp: { good: 200, poor: 500 },      // milliseconds  
+  cls: { good: 0.1, poor: 0.25 },     // ratio
+  fcp: { good: 1800, poor: 3000 },    // milliseconds
+  ttfb: { good: 800, poor: 1800 },    // milliseconds
+};
+```
+
+### Flag Management System
 ```typescript
 // Get current flags
 const flags = getFlags()
 
 // Toggle specific optimization
 setFlag('heroPreload', true)
+toggleFlag('simulateLongTask')
 
 // Check active optimizations
 const activeCount = getActiveFlagCount()
+const activeFlags = getActiveFlags()
+
+// Flags persist in localStorage
+// Key: 'hypercart-flags'
 ```
 
-## Troubleshooting
+## DevTools Analysis Guide
 
-### Common Issues
+### 🔍 Performance Panel Setup
+- **Web Vitals**: Enable checkbox to see LCP, INP, CLS markers in timeline
+- **Screenshots**: Enable to visualize loading progression
+- **Memory**: Monitor memory usage patterns during interactions
+- **CPU Throttling**: Use 4x slowdown for more visible effects
 
-**Debug panel not showing**:
-- Ensure URL contains `?debug=1`
-- Check browser console for errors
+### 📊 Key Metrics to Monitor
+- **LCP (Largest Contentful Paint)**: Target <2.5s (Green in dashboard)
+- **INP (Interaction to Next Paint)**: Target <200ms (Green in dashboard)  
+- **CLS (Cumulative Layout Shift)**: Target <0.1 (Green in dashboard)
+- **Long Tasks**: Identify red blocks >50ms in timeline
+- **FCP (First Contentful Paint)**: Target <1.8s
+- **TTFB (Time to First Byte)**: Target <800ms
 
-**Performance measurements not visible**:
-- Clear Performance timeline and re-record
-- Enable "Web Vitals" checkbox in Performance panel
-- Refresh page while recording
+### 🛠️ Network Analysis Workflow
+1. **Resource Priority**: Check fetch priority hints in Network panel
+2. **Preloading**: Verify preload links appear early in waterfall
+3. **Third-Party Impact**: Identify blocking external scripts with `injectThirdParty`
+4. **Coverage Analysis**: Use Coverage panel to find unused CSS/JS
+5. **Correlation**: Match Performance timeline Long Tasks to Network requests
 
-**Worker not available**:
-- Check `/public/worker.js` exists
-- Verify HTTPS or localhost (workers require secure context)
-- Falls back to main thread automatically
+### 🤖 AI-Powered Analysis (Chrome 127+)
+- Right-click any function in Performance call tree
+- Select "Explain with AI" for detailed optimization suggestions
+- Use for complex performance bottleneck analysis
 
-**Third-party script not loading**:
-- Check `/public/thirdparty.js` exists
-- Verify network panel shows script request
-- Banner should appear at top when loaded
+## Browser Compatibility & Requirements
 
-### Browser Compatibility
+### Minimum Requirements
+- **Chrome 88+**: Full Core Web Vitals support (LCP, FID, CLS)
+- **Chrome 96+**: INP metric support  
+- **Chrome 127+**: AI-powered DevTools features
+- **HTTPS/Localhost**: Required for Web Workers in production
 
-- **Chrome 88+**: Full feature support including INP
-- **Chrome DevTools**: Required for performance analysis
-- **Local Development**: All features work on localhost
-- **HTTPS**: Required for Web Workers in production
+### Recommended Setup
+- **Chrome DevTools**: Latest version for all features
+- **Desktop Chrome**: Best performance analysis experience
+- **High-resolution display**: For clear metric visualization during demos
 
 ## File Structure
 
 ```
 src/
 ├── components/
-│   ├── pages/           # Route components
-│   ├── DebugPanel.tsx   # Performance toggle UI
-│   ├── Navigation.tsx   # App navigation
-│   └── StatusBar.tsx    # Dev status display
+│   ├── pages/                    # Main route components
+│   │   ├── HomePage.tsx          # LCP/CLS demo page
+│   │   ├── ProductsPage.tsx      # Network/Coverage demo  
+│   │   ├── ProductDetailPage.tsx # INP/Long Tasks demo
+│   │   ├── SearchPage.tsx        # Input responsiveness demo
+│   │   └── CheckoutPage.tsx      # CLS/UX demo
+│   ├── DebugPanel.tsx            # Performance flags UI
+│   ├── PerformanceDashboard.tsx  # Core Web Vitals dashboard
+│   ├── Navigation.tsx            # App navigation
+│   ├── StatusBar.tsx             # Development status
+│   └── ui/                       # Reusable UI components
 ├── lib/
-│   ├── performance-flags.ts    # Flag management
-│   ├── performance-utils.ts    # Perf utilities
-│   └── types.ts               # TypeScript types
-└── assets/images/       # Demo images
+│   ├── performance-flags.ts      # Flag management system
+│   ├── performance-utils.ts      # Performance utilities & blocking
+│   ├── products.ts               # Demo product data
+│   ├── product-images.ts         # Local image management
+│   └── types.ts                  # TypeScript definitions
+├── assets/
+│   ├── images/                   # Local product & hero images
+│   └── video/                    # Hero background video
+└── hooks/
+    ├── use-cart.ts               # Shopping cart state management
+    └── use-mobile.ts             # Mobile detection
+
 public/
-├── thirdparty.js       # Heavy blocking script
-├── extra.css          # Unused CSS for Coverage
-└── worker.js          # Web Worker for offloading
+├── thirdparty.js                 # Heavy blocking script for demos
+├── extra.css                     # Unused CSS for Coverage analysis
+└── worker.js                     # Web Worker for background processing
 ```
 
-### Conference Tips
+## Troubleshooting
 
-### Speaker Preparation
-1. **Pre-record videos**: Graba todos los demos con anticipación usando `VIDEO_RECORDING_GUIDE.md`
-2. **Clear DevTools**: Asegúrate de que las DevTools estén bien configuradas para grabación
-3. **Stable environment**: Usa throttling consistente para resultados predecibles
-4. **Multiple takes**: Graba varias versiones de cada demo
+### Common Issues
 
-### Audience Engagement
-- **Video + live explanation**: Muestra videos pregrabados con narración en vivo
-- **Before/after comparisons**: Videos claros con métricas específicas
-- **Q&A scenarios**: Ten la app funcionando para preguntas específicas
-- **Flag demonstrations**: Puedes hacer toggles en vivo durante Q&A si es necesario
+**Debug panel not visible**:
+- Ensure URL contains `?debug=1` 
+- Clear browser cache and localStorage
+- Check browser console for JavaScript errors
 
-### Demo Environment
-- **Video backup**: Todos los demos como videos descargados localmente
-- **Chrome DevTools**: Configuradas para máxima visibilidad en pantalla
-- **Local app running**: Como fallback para preguntas específicas
-- **Screen sharing optimized**: Resolución y tamaño optimizados para proyección
+**Core Web Vitals Dashboard not updating**:
+- Refresh page to reset metrics
+- Ensure sufficient user interactions for INP measurement
+- Check that performance observers are supported (Chrome 88+)
+
+**Performance measurements missing**:
+- Enable "Web Vitals" checkbox in Performance panel
+- Clear timeline before recording new session
+- Ensure page has sufficient content for LCP measurement
+
+**Worker functionality failing**:
+- Verify `/public/worker.js` exists and is accessible
+- Check HTTPS or localhost requirement (workers need secure context)
+- Falls back to main thread processing automatically
+
+**Third-party script not loading**:
+- Confirm `/public/thirdparty.js` exists
+- Check Network panel for successful script request
+- Look for banner appearance at top when script loads
+
+**Flags not persisting**:
+- Check localStorage is enabled in browser
+- Clear localStorage and reset flags if corrupted
+- Flags stored under key: `hypercart-flags`
+
+### Performance Tips
+
+**For Consistent Demo Results**:
+- Use CPU throttling (4x slowdown) for more visible effects
+- Clear cache between demo runs for consistent loading times
+- Close other browser tabs to reduce system impact
+- Use Incognito mode to avoid extension interference
+
+**For Video Recording**:
+- Use fixed browser window size for consistent framing
+- Enable high contrast mode for better visibility
+- Record at lower playback speed, then speed up in editing
+- Test demo flow multiple times before recording
 
 ---
 
-**Built for Chrome DevTools performance debugging conferences by the HyperCart Lab team** 🚀
+**Built for Chrome DevTools performance debugging demonstrations** 🚀  
+
+*HyperCart Lab provides a realistic e-commerce environment for learning and demonstrating Core Web Vitals optimization techniques with real-time feedback and comprehensive debugging tools.*

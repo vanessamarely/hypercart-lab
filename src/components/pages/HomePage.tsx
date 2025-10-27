@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { HeroSection } from '@/components/HeroSection';
 import { getFlags } from '@/lib/performance-flags';
@@ -13,7 +13,9 @@ interface HomePageProps {
 
 export function HomePage({ onNavigate }: HomePageProps) {
   const [showLateBanner, setShowLateBanner] = useState(false);
-  const flags = getFlags();
+  
+  // Memoize flags to prevent infinite re-renders
+  const flags = useMemo(() => getFlags(), []);
 
   useEffect(() => {
     addPerformanceMark('home-page-start');
