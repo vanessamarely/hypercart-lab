@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getFlags } from '@/lib/performance-flags';
-import { addPerformanceMark, measurePerformance, microYield } from '@/lib/performance-utils';
+import { addPerformanceMark, measurePerformance, microYield, WorkerManager } from '@/lib/performance-utils';
 import { Product, CartItem } from '@/lib/types';
 import { getAllProducts, searchProducts as searchProductsFromLib } from '@/lib/products';
 import { getLocalProductImage } from '@/lib/product-images';
@@ -27,9 +27,39 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
   const [showCartModal, setShowCartModal] = useState(false);
   const [addedProduct, setAddedProduct] = useState<Product | null>(null);
   const [productImages, setProductImages] = useState<Map<number, string>>(new Map());
+  const [flagsVersion, setFlagsVersion] = useState(0); // Force re-renders when flags change
   
-  // Memoize flags to prevent infinite re-renders
-  const flags = useMemo(() => getFlags(), []);
+  // Web Worker for search operations
+  const workerRef = useRef<WorkerManager | null>(null);
+  
+  // Get current flags - will update when flagsVersion changes
+  const flags = useMemo(() => getFlags(), [flagsVersion]);
+
+  // Listen for flag changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'hypercart-flags') {
+        setFlagsVersion(prev => prev + 1); // Force flags re-evaluation
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Initialize Web Worker
+  useEffect(() => {
+    if (flags.useWorker) {
+      workerRef.current = new WorkerManager();
+    }
+    
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+    };
+  }, [flags.useWorker]);
 
   useEffect(() => {
     const loadProductsWithImages = async () => {
@@ -48,10 +78,18 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
     loadProductsWithImages();
   }, []);
 
-  // Simple search function
+  // Enhanced search function with Web Worker support
   const performSearch = async (searchQuery: string) => {
     addPerformanceMark('search-start');
     setIsSearching(true);
+
+    // Debug: Log current flags state
+    console.log('🔍 Search initiated with flags:', {
+      useWorker: flags.useWorker,
+      microYield: flags.microYield,
+      debounce: flags.debounce,
+      query: searchQuery
+    });
 
     try {
       const searchTerms = searchQuery.toLowerCase().split(' ').filter(term => term.length > 0);
@@ -61,46 +99,91 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
         return;
       }
 
-      // Simulate heavy computation
-      for (let i = 0; i < 50000; i++) {
-        Math.sin(i) * Math.cos(i);
-      }
-
-      let filteredResults: Product[] = [];
-
-      if (flags.microYield) {
-        // Process in chunks with yields
-        const chunkSize = 50;
-        for (let i = 0; i < searchProducts.length; i += chunkSize) {
-          const chunk = searchProducts.slice(i, i + chunkSize);
-          const chunkResults = chunk.filter(product => 
-            searchTerms.every(term => 
-              product.name.toLowerCase().includes(term) ||
-              product.description.toLowerCase().includes(term) ||
-              product.category.toLowerCase().includes(term)
-            )
-          );
-          filteredResults = [...filteredResults, ...chunkResults];
+      // BEFORE ❌: All processing on main thread (blocks UI)
+      // AFTER ✅: Use Web Worker for heavy processing when flag is enabled
+      if (flags.useWorker && workerRef.current) {
+        addPerformanceMark('worker-search-start');
+        console.log('🟢 Using Web Worker for search processing');
+        
+        try {
+          // Send search data to worker for background processing
+          const workerResults = await workerRef.current.execute('search', {
+            query: searchQuery,
+            products: searchProducts
+          });
           
-          await microYield();
+          addPerformanceMark('worker-search-end');
+          measurePerformance('worker-search', 'worker-search-start', 'worker-search-end');
+          
+          console.log('✅ Web Worker search completed, results:', workerResults.length);
+          
+          // Worker returns results, no main thread blocking
+          setResults(workerResults.slice(0, 20));
+          
+        } catch (error) {
+          console.warn('❌ Worker search failed, falling back to main thread:', error);
+          // Fallback to main thread processing
+          await performMainThreadSearch(searchTerms);
         }
       } else {
-        // Process all at once (blocking)
-        filteredResults = searchProducts.filter(product => 
+        console.log('🟡 Using main thread for search processing');
+        // Main thread processing (potentially blocking)
+        await performMainThreadSearch(searchTerms);
+      }
+
+    } finally {
+      setIsSearching(false);
+      addPerformanceMark('search-end');
+      measurePerformance('search-operation', 'search-start', 'search-end');
+    }
+  };
+
+  // Main thread search function (can block UI)
+  const performMainThreadSearch = async (searchTerms: string[]) => {
+    console.log('🔄 Starting main thread search with microYield:', flags.microYield);
+    
+    // Simulate heavy computation that blocks main thread
+    const heavyComputationStart = performance.now();
+    for (let i = 0; i < 50000; i++) {
+      Math.sin(i) * Math.cos(i);
+    }
+    const heavyComputationEnd = performance.now();
+    console.log(`⏱️ Heavy computation took: ${(heavyComputationEnd - heavyComputationStart).toFixed(2)}ms`);
+
+    let filteredResults: Product[] = [];
+
+    if (flags.microYield) {
+      console.log('🔄 Using micro-yield processing');
+      // Process in chunks with yields to prevent blocking
+      const chunkSize = 50;
+      for (let i = 0; i < searchProducts.length; i += chunkSize) {
+        const chunk = searchProducts.slice(i, i + chunkSize);
+        const chunkResults = chunk.filter(product => 
           searchTerms.every(term => 
             product.name.toLowerCase().includes(term) ||
             product.description.toLowerCase().includes(term) ||
             product.category.toLowerCase().includes(term)
           )
         );
+        filteredResults = [...filteredResults, ...chunkResults];
+        
+        // Yield control back to browser
+        await microYield();
       }
-
-      setResults(filteredResults.slice(0, 20));
-    } finally {
-      setIsSearching(false);
-      addPerformanceMark('search-end');
-      measurePerformance('search-operation', 'search-start', 'search-end');
+    } else {
+      console.log('⚠️ Processing all at once (blocking)');
+      // Process all at once (blocking main thread)
+      filteredResults = searchProducts.filter(product => 
+        searchTerms.every(term => 
+          product.name.toLowerCase().includes(term) ||
+          product.description.toLowerCase().includes(term) ||
+          product.category.toLowerCase().includes(term)
+        )
+      );
     }
+
+    console.log(`📊 Main thread search completed, found ${filteredResults.length} results`);
+    setResults(filteredResults.slice(0, 20));
   };
 
   // Handle input change with debouncing
@@ -114,12 +197,15 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
     }
 
     if (flags.debounce) {
+      console.log('⏰ Debounced search scheduled for:', value);
       // Debounced search
       const timer = setTimeout(() => {
+        console.log('⏰ Executing debounced search for:', value);
         performSearch(value);
       }, 300);
       setDebounceTimer(timer);
     } else {
+      console.log('⚡ Immediate search for:', value);
       // Immediate search (can cause input lag)
       performSearch(value);
     }
@@ -188,6 +274,24 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
               </div>
             )}
           </div>
+          
+          {/* Performance Status Indicator */}
+          {query && (
+            <div className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
+              {flags.useWorker ? (
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Search processing in Web Worker (non-blocking)
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                  Search processing on main thread 
+                  {flags.microYield ? "(with micro-yields)" : "(blocking)"}
+                </span>
+              )}
+            </div>
+          )}
           
           {loading && (
             <div className="text-center text-muted-foreground mt-4">

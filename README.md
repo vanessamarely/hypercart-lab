@@ -127,23 +127,36 @@ npm run preview
 
 **Key Learning**: Main thread optimization and Web Worker benefits
 
-### 🔍 Demo 4: Input Responsiveness (Search)
+### 🔍 Demo 4: Input Responsiveness & Web Workers (Search)
 
 **Setup**: Open `http://localhost:5173/search?debug=1`
 
-**Problematic Input**:
+**Problematic Input (Main Thread Blocking)**:
 1. Ensure OFF: `debounce`, `microYield`, `useWorker`
 2. Open Performance panel and start recording
 3. Type rapidly: "smartphone case protection wireless"
-4. Observe input lag and constant re-searching
+4. Observe input lag, blocking main thread, and constant re-searching
 
 **Progressive Enhancement**:
-1. Enable `debounce` → Reduce search frequency
+1. Enable `debounce` → Reduce search frequency (300ms delay)
 2. Enable `microYield` → Chunk processing to prevent blocking
-3. Enable `useWorker` → Background search operations
-4. Repeat typing → Smooth, responsive input
+3. Enable `useWorker` → **Web Worker background processing** ✨
+4. Repeat typing → Smooth, responsive input with no main thread blocking
 
-**Key Learning**: Input optimization strategies and background processing
+**Key Code Demonstration**:
+```typescript
+// BEFORE ❌: Blocks main thread
+const results = performSearch(query, flags);
+    
+// AFTER ✅: Offloads to worker
+const results = await worker.execute('search', { query, products });
+```
+
+**Visual Indicators**:
+- 🟢 Green dot: "Search processing in Web Worker (non-blocking)"  
+- 🟡 Yellow dot: "Search processing on main thread"
+
+**Key Learning**: Main thread optimization, Web Worker benefits, and "Reduce JS Cost & Free Main Thread" technique
 
 ### 🧰 Demo 5: Advanced DevTools Features
 
@@ -177,9 +190,24 @@ block(120) // Blocks for 120ms
 addPerformanceMark('operation-start')
 measurePerformance('operation', 'start', 'end')
 
-// Worker management
+// Worker management - ACTUAL IMPLEMENTATION ✨
 const worker = new WorkerManager()
-await worker.execute('heavy-task', data)
+const results = await worker.execute('search', { query, products })
+
+// Search optimization patterns
+// BEFORE ❌: Main thread blocking
+const performMainThreadSearch = (searchTerms) => {
+  // Heavy computation blocks UI
+  for (let i = 0; i < 50000; i++) {
+    Math.sin(i) * Math.cos(i);
+  }
+  return products.filter(/* search logic */);
+}
+
+// AFTER ✅: Web Worker non-blocking  
+const performWorkerSearch = async (query, products) => {
+  return await worker.execute('search', { query, products });
+}
 
 // Listener optimization
 addPassiveListeners(element, ['scroll', 'touchmove'], handler)

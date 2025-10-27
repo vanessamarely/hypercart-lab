@@ -30,18 +30,40 @@ self.onmessage = function(e) {
   performance.measure('worker-task', 'worker-start', 'worker-end');
 };
 
-function performSearch(query) {
-  // Simulate heavy search computation
-  const products = generateProducts(1000);
-  const searchTerms = query.toLowerCase().split(' ');
+function performSearch(payload) {
+  // Extract query and products from payload
+  const { query, products } = payload;
   
-  return products.filter(product => {
+  if (!query || !products) {
+    return [];
+  }
+  
+  // Simulate heavy search computation in worker (doesn't block main thread)
+  for (let i = 0; i < 100000; i++) {
+    Math.sin(i) * Math.cos(i);
+  }
+  
+  const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
+  
+  if (searchTerms.length === 0) {
+    return [];
+  }
+  
+  // Perform actual search on provided products
+  const results = products.filter(product => {
     return searchTerms.every(term => 
       product.name.toLowerCase().includes(term) ||
       product.description.toLowerCase().includes(term) ||
       product.category.toLowerCase().includes(term)
     );
-  }).slice(0, 10);
+  });
+  
+  // Return results with computed scores for demo
+  return results.map(product => ({
+    ...product,
+    searchScore: Math.random() * 100, // Demo: computed relevance score
+    workerProcessed: true // Flag to show it was processed by worker
+  })).slice(0, 20);
 }
 
 function formatProductData(product) {
