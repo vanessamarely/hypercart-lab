@@ -1,8 +1,45 @@
-# GitHub Pages Deployment
+# Deployment Guide
 
-This project is configured to automatically deploy to GitHub Pages using GitHub Actions.
+This project supports multiple deployment platforms with optimized configurations.
 
-## Setup Instructions
+## Vercel Deployment (Recommended)
+
+### Prerequisites
+- Node.js 18.x or higher (configured in `.nvmrc`)
+- Vercel account
+
+### Automatic Deployment
+1. **Import your repository to Vercel:**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Vercel will automatically detect the Vite framework
+
+2. **Configuration:**
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
+   - Development Command: `npm run dev`
+
+3. **Environment Variables (if needed):**
+   ```
+   NODE_ENV=production
+   ```
+
+### Manual Deployment via CLI
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy
+vercel --prod
+```
+
+## GitHub Pages Deployment
+
+### Setup Instructions
 
 1. **Enable GitHub Pages in your repository:**
    - Go to your repository's Settings tab
@@ -21,30 +58,41 @@ This project is configured to automatically deploy to GitHub Pages using GitHub 
    - Watch the "Deploy to GitHub Pages" workflow run
    - Once complete, your site will be available at: `https://[username].github.io/[repository-name]/`
 
-## How it works
+## Build Configuration
 
-- The workflow triggers on pushes to the `main` branch
-- It builds the Vite app using `npm run build`
-- The built files are deployed to GitHub Pages
-- The base path is automatically configured based on your repository name
+The project includes optimized build settings in `vite.config.ts`:
 
-## Local Development
-
-For local development, the app runs normally without the base path:
-
-```bash
-npm run dev
-```
+- **Target**: `esnext` for modern browsers
+- **Minification**: `esbuild` for fast builds
+- **Code Splitting**: Vendor and UI chunks for optimal loading
+- **Source Maps**: Disabled in production for smaller bundles
 
 ## Troubleshooting
 
-- **404 errors**: Make sure GitHub Pages is enabled and set to "GitHub Actions" as the source
-- **Assets not loading**: The workflow automatically configures the base path for your repository
-- **Build failures**: Check the Actions tab for detailed error logs
+### Vercel Issues
+- **Module not found errors**: Ensure `vercel.json` is properly configured
+- **Build timeouts**: Check if dependencies are properly listed in `package.json`
+- **404 on refresh**: SPA routing is handled by the catch-all route in `vercel.json`
 
-## Manual Deployment
+### General Issues
+- **Dependencies**: Run `npm install` to ensure all packages are installed
+- **TypeScript errors**: Run `npm run build` locally to check for type issues
+- **Asset loading**: Verify build output in `dist/` folder
 
-You can also trigger a deployment manually:
-1. Go to the Actions tab
-2. Select "Deploy to GitHub Pages" workflow
-3. Click "Run workflow"
+### Local Development
+
+For local development:
+
+```bash
+npm install
+npm run dev
+```
+
+### Production Preview
+
+To test the production build locally:
+
+```bash
+npm run build
+npm run preview
+```

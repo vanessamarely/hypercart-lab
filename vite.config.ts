@@ -20,4 +20,24 @@ export default defineConfig({
       '@': resolve(projectRoot, 'src')
     }
   },
+  build: {
+    // Optimize for Vercel deployment
+    target: 'esnext',
+    minify: 'esbuild',
+    sourcemap: false,
+    rollupOptions: {
+      // Ensure external dependencies are handled correctly
+      external: [],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-accordion', '@radix-ui/react-alert-dialog', '@radix-ui/react-avatar']
+        }
+      }
+    }
+  },
+  optimizeDeps: {
+    // Pre-bundle these dependencies for better performance
+    include: ['react', 'react-dom', 'react-router-dom']
+  }
 });
