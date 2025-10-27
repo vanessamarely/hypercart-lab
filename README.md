@@ -31,17 +31,48 @@ npm run preview
 - **Active Count Badge**: Shows number of active flags
 - **Persistent Settings**: Flags saved in localStorage across sessions
 
+### 📊 Performance Budget Monitor
+- **Real-time Monitoring**: Live tracking of 14+ performance metrics
+- **Budget Levels**: Conservative, Moderate, and Relaxed performance standards
+- **Visual Indicators**: Color-coded status (Pass/Warning/Fail) with progress bars
+- **Violation Alerts**: Immediate notifications when budgets are exceeded
+- **Score System**: Overall performance score (0-100) based on budget compliance
+
 ### 📊 Core Web Vitals Dashboard
 - **Real-time Metrics**: Live LCP, INP, CLS, FCP, TTFB monitoring
 - **Color-coded Ratings**: Green (Good), Yellow (Needs Improvement), Red (Poor)
 - **Always Available**: Circular button in bottom-right corner (no debug=1 needed)
 - **Performance Validation**: Instantly see optimization effects
 
-### 🏪 E-commerce Features
-- **Product Catalog**: 12+ products with high-quality images
-- **Search Functionality**: Debounced search with performance optimizations
-- **Shopping Cart**: Full cart management with modal confirmations
-- **Checkout Flow**: Complete form with performance monitoring
+## Performance Budget System
+
+### 🎯 Budget Levels & Thresholds
+
+**Conservative (High Performance)**:
+- LCP: ≤2.5s, INP: ≤200ms, CLS: ≤0.1
+- Bundle Size: ≤500KB, JS: ≤300KB, CSS: ≤100KB
+- Max 20 requests, 5 third-party, 0 long tasks
+
+**Moderate (Balanced)**:
+- LCP: ≤4s, INP: ≤500ms, CLS: ≤0.25  
+- Bundle Size: ≤1MB, JS: ≤600KB, CSS: ≤200KB
+- Max 50 requests, 10 third-party, 3 long tasks
+
+**Relaxed (Basic)**:
+- LCP: ≤6s, INP: ≤1s, CLS: ≤0.5
+- Bundle Size: ≤2MB, JS: ≤1.2MB, CSS: ≤400KB  
+- Max 100 requests, 20 third-party, 10 long tasks
+
+### 📈 Budget Monitoring
+
+Access via Debug Panel → "Budget Monitor" button:
+
+- **Real-time Tracking**: 14 performance metrics monitored continuously
+- **Visual Status**: ✅ Pass (Green), ⚠️ Warning (Yellow), ❌ Fail (Red)
+- **Progress Bars**: Percentage of budget used with color coding
+- **Violation Alerts**: Immediate notification when budgets exceeded
+- **Overall Score**: 0-100 performance score based on compliance
+- **Category Breakdown**: Core Web Vitals, Resources, Performance Quality
 
 ## Performance Flags Reference
 
@@ -158,7 +189,42 @@ const results = await worker.execute('search', { query, products });
 
 **Key Learning**: Main thread optimization, Web Worker benefits, and "Reduce JS Cost & Free Main Thread" technique
 
-### 🧰 Demo 5: Advanced DevTools Features
+### 🧰 Demo 5: Performance Budget Management
+
+**Setup**: Open `http://localhost:5173/products?debug=1`
+
+**Budget Baseline**:
+1. Open Debug Panel → Click "Budget Monitor"
+2. Set Budget Level to "Conservative" (strict thresholds)
+3. Observe current performance score and violations
+4. Note which metrics are failing (likely bundle size, requests)
+
+**Introduce Budget Violations**:
+1. Enable `injectThirdParty` → Increases third-party requests
+2. Enable `loadExtraCSS` → Adds unused CSS, increases bundle size
+3. Enable `simulateLongTask` → Creates long tasks
+4. Watch real-time budget violations appear in red alerts
+
+**Budget Impact Analysis**:
+1. Budget score drops (e.g., 85 → 45)
+2. Multiple violations appear: Third-party requests, CSS size, Long tasks
+3. Progress bars turn red showing budget exceeded
+4. Overall performance classification degrades
+
+**Apply Optimizations**:
+1. Disable problem flags: `injectThirdParty`, `loadExtraCSS`, `simulateLongTask`
+2. Enable optimizations: `useWorker`, `debounce`, `heroPreload`
+3. Switch to "Moderate" budget for more realistic thresholds
+4. Observe budget compliance improvement
+
+**Budget Level Comparison**:
+- **Conservative**: Strict production standards (may show violations)
+- **Moderate**: Balanced for most apps (realistic targets)
+- **Relaxed**: Minimum acceptable (should mostly pass)
+
+**Key Learning**: Performance budgets provide measurable targets and accountability for optimization efforts
+
+### 🧰 Demo 6: Advanced DevTools Features
 
 **Performance Marks Analysis**:
 1. Open Performance panel
@@ -180,6 +246,30 @@ const results = await worker.execute('search', { query, products });
 **Key Learning**: Advanced debugging techniques and AI-assisted analysis
 
 ## Technical Implementation
+
+### Performance Budget API
+```typescript
+// Set budget level
+setBudgetLevel('conservative'); // 'moderate' | 'relaxed'
+
+// Get current budget thresholds
+const budget = getCurrentBudget();
+// Returns: { lcp: 2500, inp: 200, cls: 0.1, totalSize: 500, ... }
+
+// Monitor performance
+const collector = getPerformanceCollector();
+const status = collector.getBudgetStatus();
+
+// Check violations
+const violations = checkBudgetViolations();
+violations.forEach(v => {
+  console.log(`${v.name}: ${v.actual}${v.unit} exceeds ${v.budget}${v.unit}`);
+});
+
+// Get summary score
+const { score, passed, failed } = getBudgetSummary();
+console.log(`Performance Score: ${score}/100 (${passed} passed, ${failed} failed)`);
+```
 
 ### Performance Utilities
 ```typescript

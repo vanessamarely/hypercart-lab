@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Gear } from '@phosphor-icons/react';
+import { X, Gear, ChartBar } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import {
   addFontPreconnect,
   removeFontPreconnect,
 } from '@/lib/performance-utils';
+import PerformanceBudgetDashboard from './PerformanceBudgetDashboard';
 
 interface DebugPanelProps {
   visible: boolean;
@@ -50,6 +51,7 @@ const FLAG_GROUPS = {
 
 export function DebugPanel({ visible, onClose }: DebugPanelProps) {
   const [flags, setFlags] = useState<PerformanceFlags>(getFlags());
+  const [currentView, setCurrentView] = useState<'flags' | 'budget'>('flags');
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -93,13 +95,48 @@ export function DebugPanel({ visible, onClose }: DebugPanelProps) {
 
   if (!visible) return null;
 
+  // Show Budget Dashboard if requested
+  if (currentView === 'budget') {
+    return (
+      <div className="debug-panel">
+        <div className="flex items-center justify-between mb-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setCurrentView('flags')}
+            className="flex items-center gap-2"
+          >
+            ← Back to Debug Panel
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X size={16} />
+          </Button>
+        </div>
+        <PerformanceBudgetDashboard 
+          visible={true} 
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="debug-panel">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Performance Debug Panel</h3>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X size={16} />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setCurrentView('budget')}
+            className="flex items-center gap-2"
+          >
+            <ChartBar size={16} />
+            Budget Monitor
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X size={16} />
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-6">
