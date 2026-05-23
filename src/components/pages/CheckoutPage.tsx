@@ -127,7 +127,14 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <CardTitle>Billing Information</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-4"
+                  // WebMCP Declarative API – lets AI agents fill and submit
+                  // the checkout form in a structured, reliable way.
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  {...({ webmcp: '', 'data-webmcp-name': 'checkout', 'data-webmcp-description': 'Complete a purchase by submitting billing and payment details' } as any)}
+                >
                   <div>
                     <Label htmlFor="email">Email</Label>
                     <Input
