@@ -258,9 +258,18 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
             Search through our catalog with local product images. Use debug panel to toggle input responsiveness optimizations.
           </p>
           
-          <div className="relative">
+          <form
+            // WebMCP Declarative API – lets AI agents invoke product search
+            // without DOM scraping. The agent can fill "q" and submit.
+            webmcp=""
+            data-webmcp-name="search_products"
+            data-webmcp-description="Search the HyperCart Lab product catalog by keyword"
+            onSubmit={(e) => { e.preventDefault(); performSearch(query); }}
+            className="relative"
+          >
             <Input
               type="text"
+              name="q"
               placeholder="Search for products..."
               value={query}
               onChange={handleInputChange}
@@ -273,7 +282,7 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
               </div>
             )}
-          </div>
+          </form>
           
           {/* Performance Status Indicator */}
           {query && (

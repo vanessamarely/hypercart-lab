@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Navigation } from './components/Navigation';
 import { DebugToggleButton } from './components/DebugPanel';
 import { StatusBar } from './components/StatusBar';
@@ -9,6 +9,7 @@ import { ProductDetailPage } from './components/pages/ProductDetailPage';
 import { SearchPage } from './components/pages/SearchPage';
 import { CheckoutPage } from './components/pages/CheckoutPage';
 import { Toaster } from 'sonner';
+import { initWebMCP } from './lib/webmcp';
 
 if (import.meta.env.DEV) {
   import('./lib/asset-verification').then(({ verifyAssets }) => {
@@ -21,18 +22,27 @@ type Page = 'home' | 'products' | 'search' | 'checkout' | 'product-detail';
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const webMcpInitialized = useRef(false);
 
   // Initialize performance marks
   useEffect(() => {
     performance.mark('app-start');
   }, []);
 
-  const handleNavigation = (page: string) => {
+  const handleNavigation = useCallback((page: string) => {
     setCurrentPage(page as Page);
     if (page !== 'product-detail') {
       setSelectedProductId(null);
     }
-  };
+  }, []);
+
+  // Initialize WebMCP once navigation is available
+  useEffect(() => {
+    if (!webMcpInitialized.current) {
+      webMcpInitialized.current = true;
+      initWebMCP(handleNavigation);
+    }
+  }, [handleNavigation]);
 
   const handleProductClick = (productId: number) => {
     setSelectedProductId(productId);
