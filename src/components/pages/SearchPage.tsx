@@ -261,8 +261,9 @@ export function SearchPage({ onProductClick, onNavigate }: SearchPageProps) {
           <form
             // WebMCP Declarative API – lets AI agents invoke product search
             // without DOM scraping. The agent can fill "q" and submit.
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            {...({ webmcp: '', 'data-webmcp-name': 'search_products', 'data-webmcp-description': 'Search the HyperCart Lab product catalog by keyword' } as any)}
+            webmcp=""
+            data-webmcp-name="search_products"
+            data-webmcp-description="Search the HyperCart Lab product catalog by keyword"
             onSubmit={(e) => { e.preventDefault(); performSearch(query); }}
             className="relative"
           >

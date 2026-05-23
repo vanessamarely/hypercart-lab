@@ -8,36 +8,52 @@
  * Spec: https://github.com/explainers-by-googlers/web-mcp
  */
 
+import { CartItem } from './types';
+
 const CART_KEY = 'hypercart-cart';
 
+/** Slim cart entry returned by WebMCP tools. */
+interface CartEntry {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  category: string;
+}
+
 /** Read cart items from localStorage (matches use-cart.ts). */
-function readCart(): { id: number; name: string; price: number; quantity: number; category: string }[] {
+function readCart(): CartEntry[] {
   try {
     const raw = localStorage.getItem(CART_KEY);
     if (!raw) return [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const items: any[] = JSON.parse(raw);
+    const items: CartItem[] = JSON.parse(raw);
     return items.map((item) => ({
-      id: item.product?.id ?? item.id,
-      name: item.product?.name ?? item.name,
-      price: item.product?.price ?? item.price,
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
       quantity: item.quantity,
-      category: item.product?.category ?? item.category ?? '',
+      category: item.product.category,
     }));
   } catch {
     return [];
   }
 }
 
-/** Write updated cart items back to localStorage and notify listeners. */
-function writeCart(
-  items: { id: number; name: string; price: number; quantity: number; category: string }[],
-) {
+/** Write updated cart entries back to localStorage and notify React listeners. */
+function writeCart(entries: CartEntry[]) {
   try {
-    // Re-shape back to the CartItem format used by use-cart.ts
-    const cartItems = items.map((item) => ({
-      product: { id: item.id, name: item.name, price: item.price, category: item.category },
-      quantity: item.quantity,
+    const cartItems: CartItem[] = entries.map((entry) => ({
+      product: {
+        id: entry.id,
+        name: entry.name,
+        price: entry.price,
+        category: entry.category,
+        description: '',
+        rating: 0,
+        inStock: true,
+        image: '',
+      },
+      quantity: entry.quantity,
     }));
     localStorage.setItem(CART_KEY, JSON.stringify(cartItems));
     // Dispatch a StorageEvent so the React hook can pick up the change
@@ -48,6 +64,9 @@ function writeCart(
     // Silently ignore storage errors
   }
 }
+
+const VALID_PAGES = ['home', 'products', 'search', 'checkout'] as const;
+type AppPage = typeof VALID_PAGES[number];
 
 /** Initialise the WebMCP imperative API if the browser supports it. */
 export function initWebMCP(
@@ -220,26 +239,27 @@ export function initWebMCP(
         name: 'navigate_to_page',
         description:
           'Navigates to a specific page of HyperCart Lab. ' +
-          'Available pages: home, products, search, checkout.',
+          `Available pages: ${VALID_PAGES.join(', ')}.`,
         inputSchema: {
           type: 'object',
           properties: {
             page: {
               type: 'string',
-              enum: ['home', 'products', 'search', 'checkout'],
+              enum: VALID_PAGES,
               description: 'The page to navigate to.',
             },
           },
           required: ['page'],
         },
-        async execute(input: { page: string }) {
-          const validPages = ['home', 'products', 'search', 'checkout'];
-          if (!validPages.includes(input.page)) {
+        async execute(input: { page: AppPage }) {
+          if (!(VALID_PAGES as readonly string[]).includes(input.page)) {
             return {
               content: [
                 {
                   type: 'text',
-                  text: JSON.stringify({ error: `Unknown page "${input.page}". Valid pages: ${validPages.join(', ')}.` }),
+                  text: JSON.stringify({
+                    error: `Unknown page "${input.page}". Valid pages: ${VALID_PAGES.join(', ')}.`,
+                  }),
                 },
               ],
               isError: true,

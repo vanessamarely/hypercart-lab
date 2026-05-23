@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Navigation } from './components/Navigation';
 import { DebugToggleButton } from './components/DebugPanel';
 import { StatusBar } from './components/StatusBar';
@@ -29,12 +29,12 @@ function App() {
     performance.mark('app-start');
   }, []);
 
-  const handleNavigation = (page: string) => {
+  const handleNavigation = useCallback((page: string) => {
     setCurrentPage(page as Page);
     if (page !== 'product-detail') {
       setSelectedProductId(null);
     }
-  };
+  }, []);
 
   // Initialize WebMCP once navigation is available
   useEffect(() => {
@@ -42,8 +42,7 @@ function App() {
       webMcpInitialized.current = true;
       initWebMCP(handleNavigation);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleNavigation]);
 
   const handleProductClick = (productId: number) => {
     setSelectedProductId(productId);
